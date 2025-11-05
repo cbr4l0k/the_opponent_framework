@@ -4,8 +4,9 @@ from typing import Any, Literal, Optional, TypedDict
 from langgraph.graph import StateGraph, END
 from ..prompts.noma_prompts import NOMA_PROMPTS
 from ..structs.note import Resource, NoMaNote, NoteTags, NoteTitle
-from .misc import MDBuilder
+from ..misc.markdown_tools import MDBuilder
 from langchain_ollama import ChatOllama
+from langchain_core.output_parsers import PydanticOutputParser
 
 
 class NoMaState(TypedDict):
@@ -82,7 +83,7 @@ class NomaNoteCreator:
         self.graph.add_edge("generate_topic_tags", "merge_metadata")
 
         # Conditional edge to fetch resources:
-        self.graph.add_conditional_edge(
+        self.graph.add_conditional_edges(
                 "merge_metadata",
                 self.should_fetch_resources,
                 {
@@ -117,9 +118,8 @@ class NomaNoteCreator:
                 )
         structured_model = self.llm.with_structured_output(NoMaNote)
         note = await structured_model.ainvoke(prompt)
-        state["synthesized_note"] = note.content
-
-        return state
+        
+        return {"synthesized_note": note.content} # type: ignore
 
     async def generate_title(self, state:NoMaState) -> NoMaState:
         """`Node`: Generate a title for the synthesized note."""
@@ -129,9 +129,8 @@ class NomaNoteCreator:
         structured_model = self.llm.with_structured_output(NoteTitle)
 
         title = await structured_model.ainvoke(prompt)
-        state["note_title"] = title.title
 
-        return state
+        return {"note_title": title.title} # type: ignore
 
     async def generate_topic_tags(self, state:NoMaState) -> NoMaState:
         """`Node`: Generate topic tags for the synthesized note."""
@@ -140,10 +139,10 @@ class NomaNoteCreator:
                 )
         structured_model = self.llm.with_structured_output(NoteTags)
         tags = await structured_model.ainvoke(prompt)
-        state["topic_tags"] = [
-                f"{tag.lstrip("#t/")}" for tag in tags.tags
-                ]
-        return state
+
+        return {
+                "topic_tags": [f"{tag.lstrip('#t/')}" for tag in tags.tags]
+                } # type: ignore
 
     async def fetch_resources(self, state:NoMaState) -> NoMaState:
         """`Node`: Fetch relevant resources for the synthesized note."""
@@ -152,7 +151,7 @@ class NomaNoteCreator:
             return state
 
         note = state["synthesized_note"]
-        prompt = NOMA_PROMPTS['resource_search'].format(
+        prompt = NOMA_PROMPTS['resources'].format(
                 topic=note
             )
         structured_model = self.llm.with_structured_output(Resource)
