@@ -46,7 +46,7 @@ class NoMaState(TypedDict):
 class NomaNoteCreator:
     """Agent for creating structured notes using the Noma method."""
 
-    def __init__(self, ollama_model: str, prompts: dict[str, str]) -> None:
+    def __init__(self, ollama_model: str) -> None:
         """
         Initialize the Noma note creator agent.
 
@@ -55,7 +55,6 @@ class NomaNoteCreator:
             `prompts`: Dictionary of Noma method prompts
         """
         self.ollama_model = ollama_model
-        self.prompts = prompts
         self.llm =  ChatOllama(model=self.ollama_model, temperature=0.7)
 
         self.graph = StateGraph(NoMaState)

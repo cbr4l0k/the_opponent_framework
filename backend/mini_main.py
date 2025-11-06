@@ -90,10 +90,7 @@ However, some research suggests that prolonged isolation can lead to decreased c
     # -------------------------------------------------------------------------
     print("\n[STEP 2] Creating a Note using NoMa Method...")
  
-    noma_creator = NomaNoteCreator(
-        ollama_model=OLLAMA_MODEL,
-        prompts=NOMA_PROMPTS
-    )
+    noma_creator = NomaNoteCreator(ollama_model=OLLAMA_MODEL)
     print("✓ NoMaNoteCreator initialized")
  
     # Sample NoMa responses (normally from user input)
