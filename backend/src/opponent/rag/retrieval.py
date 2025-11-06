@@ -83,11 +83,17 @@ class Retriever:
         full_query = f"{claim}\n\nContext: {context}" if context else claim
 
         # Strategy 1: Get notes tagged with #opponent
-        opponent_tagged = self.vectorstore.search(
+        # Note: ChromaDB doesn't support $contains, so we search and filter in Python
+        all_results = self.vectorstore.search(
                 query=full_query,
-                top_k=self.top_k,
-                filter_metadata={"tags": {"$contains": "opponent"}},
+                top_k=self.top_k * 3,  # Get more results to filter
                 )
+ 
+        # Filter for tags containing "opponent"
+        opponent_tagged = [
+            result for result in all_results
+            if "opponent" in result.get("metadata", {}).get("tags", "").lower()
+        ][:self.top_k]  # Keep only top_k after filtering
 
         # Strategy 2: Search with opposition-focused phrasing
         opposition_query = f"arguments against {claim}, counerpoints to {claim}, challenges to {claim}"
@@ -105,7 +111,7 @@ class Retriever:
 
         if combined_results:
             # Re rank the files
-            reranked = self._rerank_results(
+            reranked = await self._rerank_results(
                     query=claim,
                     results=list(combined_results.values()),
                     )
@@ -125,13 +131,18 @@ class Retriever:
         """
         k = top_k or self.top_k
 
-        results = self.vectorstore.search(
+        all_results = self.vectorstore.search(
                 query="",
-                top_k=k * 2, 
-                filter_metadata={"tags": {"$contains": tag}},
+                top_k=k * 3,
                 )
+ 
+        # Filter for tags containing the specified tag
+        filtered_results = [
+            result for result in all_results
+            if tag.lower() in result.get("metadata", {}).get("tags", "").lower()
+        ][:k]
 
-        return results[:k]
+        return filtered_results
 
     async def _rerank_results(self, query: str, results: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """

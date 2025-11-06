@@ -9,11 +9,11 @@ class MDBuilder:
     """
     title: str = ""
     # Tags:
-    #	| Source	<#s/>: noma 
+    #	| Source	<#s/>: opponent 
     #	| Context	<#c/>: selftudy 
     #	| Topic		<#t/>: Must be added separately
     tags: List[str] = field(
-            default_factory=lambda: ["#s/noma", "#c/selfstudy"]
+            default_factory=lambda: ["#s/opponent", "#c/selfstudy"]
             )
     content: str = ""
 
@@ -40,10 +40,11 @@ class MDBuilder:
         """Generate the frontmatter metadata for the note."""
         assert self.title, "Title must be set before generating metadata."
         metadata = "---\n"
-        metadata += f"title: {self.title}\n"
-        metadata += "tags:\n"
-        for tag in self.tags:
-            metadata += f"\t- {tag}\n"
+        title = self.title
+        # Quote title if it contains YAML special characters (: [ ] { } , & * # ? | - < > = ! % @ \)
+        if any(char in title for char in ':[]{},"\'&*#?|-<>=!%@\\'):
+            title = f'"{title}"'
+        metadata += f"title: {title}\n"
         metadata += "---\n"
 
         self.content = metadata + self.content

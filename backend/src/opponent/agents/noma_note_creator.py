@@ -176,7 +176,7 @@ class NomaNoteCreator:
         md = MDBuilder()
 
         title = str(state['note_title']).strip() or "Untitled Note"
-        state['output_file_name'] = f"{title.lower().replace(" ", "_")}.md"
+        state['output_file_name'] = f"{title.lower().replace(' ', '_')}.md"
 
         md.set_title(title)
 
@@ -206,5 +206,7 @@ class NomaNoteCreator:
 
     async def merge_metadata(self, state: NoMaState) -> NoMaState:
         """`Node`: Merge title and tags into the final output."""
+        if "resources" not in state:
+            state["resources"] = None
         return state
 

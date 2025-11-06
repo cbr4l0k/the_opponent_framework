@@ -46,12 +46,14 @@ class VectorStore:
         """Extract frontmatter and content from a markdown file."""
         with file_path.open("r", encoding="utf-8") as f:
             post = frontmatter.load(f)
+        tags = post.get("tags", [])
+        valid_tags = [tag for tag in tags if tag is not None] # type: ignore
         return {
                 "content": post.content,
                 "metadata": {
                     "path": str(file_path),
                     "title": post.get("title", file_path.stem),
-                    "tags": ','.join(post.get("tags", []))
+                    "tags": ','.join(valid_tags)
                     },
                 }
 
@@ -195,7 +197,7 @@ class VectorStore:
                 results.get("distances", [[]])[0], # type: ignore
                 ):
             formatted_results.append({
-                "document": doc,
+                "content": doc,
                 "metadata": meta,
                 "similarity_score": 1 - dist,  # Convert distance to similarity
                 })

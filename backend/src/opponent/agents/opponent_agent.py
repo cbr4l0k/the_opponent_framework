@@ -56,9 +56,18 @@ class OpponentAgent:
 
         self.graph = StateGraph(OpponentState)
 
-        # TODO: Initialize LangGraph workflow for opposition
-        # TODO: Set up RAG chain for evidence retrieval
-        # TODO: Configure opponent prompts and persona
+        # Add nodes
+        self.graph.add_node("validate_input", self.validate_input)
+        self.graph.add_node("retrieve_counter_evidence", self.retrieve_counter_evidence)
+        self.graph.add_node("analyze_arguments", self.analyze_arguments)
+        self.graph.add_node("summarize_opposition", self.summarize_opposition)
+
+        # Add edges
+        self.graph.set_entry_point("validate_input")
+        self.graph.add_edge("validate_input", "retrieve_counter_evidence")
+        self.graph.add_edge("retrieve_counter_evidence", "analyze_arguments")
+        self.graph.add_edge("analyze_arguments", "summarize_opposition")
+        self.graph.add_edge("summarize_opposition", END)
 
         # Compile
         self.app = self.graph.compile()
@@ -110,7 +119,7 @@ class OpponentAgent:
                 "The claim may be novel, or your vault lacks opposing perspectives."
             )
             return state
-        prompt = OPPONENT_PROMPTS["detailed_analysis"].format(
+        prompt = OPPONENT_PROMPTS["analysis"].format(
                 note_content=state["note_content"],
                 counter_evidence=counter_evidence_text,
                 )
@@ -126,11 +135,11 @@ class OpponentAgent:
             return state
 
         # Summary generation
-        propmpt = OPPONENT_PROMPTS["summary"].format(
+        prompt = OPPONENT_PROMPTS["summary"].format(
             note_content=state["note_content"][:MAX_CHARS_ANALYSIS],  # First 500 chars
             detailed_analysis=state["detailed_analysis"]
         )
-        response = await self.llm.ainvoke(propmpt)
+        response = await self.llm.ainvoke(prompt)
         state["summary"] = response.content 
         return state
 
