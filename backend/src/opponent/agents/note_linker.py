@@ -2,7 +2,7 @@
 
 from typing import Optional, TypedDict
 from langgraph.graph import StateGraph, END
-from ..rag.retrieval import Retriever
+from ..rag import Retriever
 
 MAX_CHARS_REASON = 200
 

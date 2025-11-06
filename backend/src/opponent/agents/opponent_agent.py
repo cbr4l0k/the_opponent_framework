@@ -3,8 +3,8 @@
 from typing import Optional, TypedDict
 from langgraph.graph import StateGraph, END
 from langchain_ollama import ChatOllama
-from ..rag.retrieval import Retriever
-from ..prompts.opponent_prompts import OPPONENT_PROMPTS
+from ..rag import Retriever
+from ..prompts import OPPONENT_PROMPTS
 
 MAX_CHARS_ANALYSIS = 500
 

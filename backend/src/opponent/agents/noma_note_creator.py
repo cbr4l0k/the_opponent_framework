@@ -1,10 +1,10 @@
 """LangGraph agent for creating notes using the Noma method."""
 
-from typing import Any, Literal, Optional, TypedDict
+from typing import Literal, Optional, TypedDict
 from langgraph.graph import StateGraph, END
-from ..prompts.noma_prompts import NOMA_PROMPTS
-from ..structs.note import Resource, NoMaNote, NoteTags, NoteTitle
-from ..misc.markdown_tools import MDBuilder
+from ..prompts import NOMA_PROMPTS
+from ..structs import Resource, NoMaNote, NoteTags, NoteTitle
+from ..misc import MDBuilder
 from langchain_ollama import ChatOllama
 
 
