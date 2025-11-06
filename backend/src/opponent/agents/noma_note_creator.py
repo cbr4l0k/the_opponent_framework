@@ -1,5 +1,7 @@
 """LangGraph agent for creating notes using the Noma method."""
 
+import re
+from uuid import uuid4
 from typing import Literal, Optional, TypedDict
 from langgraph.graph import StateGraph, END
 from ..prompts import NOMA_PROMPTS
@@ -175,7 +177,12 @@ class NomaNoteCreator:
         md = MDBuilder()
 
         title = str(state['note_title']).strip() or "Untitled Note"
-        state['output_file_name'] = f"{title.lower().replace(' ', '_')}.md"
+
+        sanitized_title = re.sub(r'[^a-zA-Z0-9\s\-_]', '', title)
+        filename = sanitized_title.lower().replace(' ', '_')
+        filename = re.sub(r'_+', '_', filename)
+        filename = filename.strip('_')
+        state['output_file_name'] = f"{filename}.md" if filename else f"untitled_note_{str(uuid4())}.md"
 
         md.set_title(title)
 

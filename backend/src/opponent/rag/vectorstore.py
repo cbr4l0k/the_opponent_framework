@@ -199,7 +199,7 @@ class VectorStore:
             formatted_results.append({
                 "content": doc,
                 "metadata": meta,
-                "similarity_score": 1 - dist,  # Convert distance to similarity
+                "score": 1 - dist,  # Convert distance to similarity
                 })
 
         return formatted_results
