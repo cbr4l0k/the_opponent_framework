@@ -41,7 +41,7 @@ class Retriever:
                 "",
                 "Return ONLY the concepts as a coma-separated list, nothing else."
                 ))
-        response = await self.llm.invoke(concept_prompt)
+        response = await self.llm.ainvoke(concept_prompt)
         concepts = response.content.strip()
         
         # Search using those concepts
@@ -128,12 +128,12 @@ class Retriever:
         results = self.vectorstore.search(
                 query="",
                 top_k=k * 2, 
-                filder_metadata={"tags": {"$contains": tag}},
+                filter_metadata={"tags": {"$contains": tag}},
                 )
 
-        raise NotImplementedError("Tag retrieval not implemented yet")
+        return results[:k]
 
-    def _rerank_results(self, query: str, results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    async def _rerank_results(self, query: str, results: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         Rerank search results using LLM for better relevance.
         """
@@ -154,7 +154,7 @@ class Retriever:
 
         rerank_prompt += "Return ONLY a JSON array of scores in order, like: [8, 3, 6, 9, 2]\nDo not include any explanation, just the array."
 
-        response = await self.llm.invoke(rerank_prompt)
+        response = await self.llm.ainvoke(rerank_prompt)
         
         try: 
             # Parse scores
@@ -172,7 +172,6 @@ class Retriever:
           # If parsing fails, return original order
           print(f"⚠️  Failed to parse reranking scores, using original order: {e}")
           return results
-        raise NotImplementedError()
 
 
 
