@@ -15,8 +15,7 @@ from ..rag import Retriever
 class LinkRequest(BaseModel):
     """Request model for finding related notes to link."""
  
-    note_path: str = Field(
-        ...,
+    note_path: str = Field( ...,
         description="Path to the note file",
         examples=[
             "vault/my_note.md"

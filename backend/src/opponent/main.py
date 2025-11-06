@@ -6,8 +6,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from .api import links as links_api
-from .api import notes as notes_api
+from .api import links 		as links_api
+from .api import notes 		as notes_api
+from .api import opponent 	as opponent_api
+from .api import vault 		as vault_api
 from .config import settings
 from .rag import Retriever, VectorStore
 
@@ -24,8 +26,8 @@ async def lifespan(app: FastAPI):
  
     Startup:
         - Ensure required directories exist
-        - Initialize RAG components (VectorStore, Retriever)
-        - Initialize all agents (NoMa, Linker)
+        - Initialize RAG components (VectorStore, and Retriever)
+        - Initialize all agents (NoMa, Linker, and Opponent)
  
     Shutdown:
         - Cleanup resources (if needed)
@@ -57,7 +59,17 @@ async def lifespan(app: FastAPI):
  
     links_api.initialize_note_linker(retriever=retriever, max_links=settings.top_k_results)
     logger.info(f"✅ Note linker initialized")
- 
+
+    opponent_api.initialize_opponent(
+        retriever=retriever,
+        ollama_model=settings.ollama_model,
+        max_evidence=settings.top_k_results
+    )
+    logger.info(f"👹 Opponent initialized")
+
+    vault_api.initialize_vectorstore(vectorstore)
+    logger.info(f"✅ Vault service initialized")
+
     logger.info(f"✅ All systems ready! Model: {settings.ollama_model}")
     logger.info(f"📖 API docs: http://{settings.api_host}:{settings.api_port}/docs")
 
@@ -96,7 +108,10 @@ app.add_middleware(
 # |--- include routers ---|
 # +-----------------------+
 
+app.include_router(links_api.router)
 app.include_router(notes_api.router)
+app.include_router(opponent_api.router)
+app.include_router(vault_api.router)
 
 # +-----------------------+
 # |--- Endpoints setup ---|
@@ -115,9 +130,20 @@ async def root():
         "version": "0.1.0",
         "docs": "/docs",
         "endpoints": {
-            "notes": "/api/notes",
-            "health": "/api/notes/health"
-        }
+            "notes": {
+                "create": "POST /api/notes/create",
+                "health": "GET /api/notes/health"
+                },
+            "links": {
+                "find": "POST /api/links/find",
+                "health": "GET /api/links/health"
+                },
+            "opponent": {
+                "challenge": "POST /api/opponent/challenge",
+                "health": "GET /api/opponent/health"
+                },
+            "global_health": "GET /health"
+            }
     }
  
  

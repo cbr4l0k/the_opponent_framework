@@ -87,7 +87,7 @@ class NoteLinker:
                 "path": metadata.get("path", ""),
                 "title": metadata.get("title", "Untitled"),
                 "reason": result.get("snippet", "")[:MAX_CHARS_REASON],
-                "score": result.get("score", 0.0),
+                "score": result.get("score", -1),
             })
         
         state["suggested_links"] = suggested_links
