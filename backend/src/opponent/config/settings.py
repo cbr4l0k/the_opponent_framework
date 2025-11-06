@@ -19,12 +19,15 @@ class Settings(BaseSettings):
         `OBSIDIAN_VAULT_PATH=/path/to/vault`
         `OLLAMA_BASE_URL=http://localhost:11434`
     """
-
     model_config = SettingsConfigDict(
             env_file=".env",
             env_file_encoding="utf-8",
             case_sensitive=False,
             extra="ignore"  # Ignore extra fields in .env
+            )
+    log_level: str = Field(
+            default="INFO",
+            description="Logging level for the application."
             )
 
     # Ollama config
