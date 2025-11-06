@@ -1,12 +1,17 @@
 """FastAPI application entry point for The Opponent Framework."""
 
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from .config import settings
+from .api import links as links_api
 from .api import notes as notes_api
+from .config import settings
+from .rag import Retriever, VectorStore
+
+logger = logging.getLogger("uvicorn.error")
 
 # +----------------------------+
 # |--- Application Lifespan ---|
@@ -19,22 +24,47 @@ async def lifespan(app: FastAPI):
  
     Startup:
         - Ensure required directories exist
-        - Initialize the NoMa note creator agent
+        - Initialize RAG components (VectorStore, Retriever)
+        - Initialize all agents (NoMa, Linker)
  
     Shutdown:
         - Cleanup resources (if needed)
     """
     # Startup
-    print("🚀 Starting Opponent Framework API...")
+    logger.info("🚀 Starting Opponent Framework API...")
     settings.ensure_directories()
-
+ 
+    # Initialize RAG components
+    logger.info("📚 Initializing RAG components...")
+    vectorstore = VectorStore(
+        persist_directory=settings.chroma_persist_dir,
+        collection_name=settings.chroma_collection,
+        embedding_model_name=settings.embedding_model
+    )
+    logger.info(f"✅ VectorStore initialized: {settings.chroma_collection}")
+ 
+    retriever = Retriever(
+        vectorstore=vectorstore,
+        ollama_model=settings.ollama_model,
+        top_k=settings.top_k_results
+    )
+    logger.info(f"✅ Retriever initialized with top_k={settings.top_k_results}")
+ 
+    # Initialize agents
+    logger.info("🤖 Initializing agents...")
     notes_api.initialize_note_creator(ollama_model=settings.ollama_model)
-    print(f"✅ NoMa creator initialized with model: {settings.ollama_model}")
+    logger.info(f"✅ NoMa creator initialized")
+ 
+    links_api.initialize_note_linker(retriever=retriever, max_links=settings.top_k_results)
+    logger.info(f"✅ Note linker initialized")
+ 
+    logger.info(f"✅ All systems ready! Model: {settings.ollama_model}")
+    logger.info(f"📖 API docs: http://{settings.api_host}:{settings.api_port}/docs")
 
     yield
 
     # Shutdown
-    print("🛑 Shutting down Opponent Framework API...")
+    logger.info("🛑 Shutting down Opponent Framework API...")
 
 # +---------------------------+
 # |--- FastAPI Application ---|

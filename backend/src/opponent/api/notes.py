@@ -10,6 +10,7 @@ from ..agents import NomaNoteCreator
 # |--- Requests/Response Data Models ---|
 # +-------------------------------------+
 
+
 class NoMaRequests(BaseModel):
     """Request model for creating a note using the NoMa method."""
     interesting: str = Field(
