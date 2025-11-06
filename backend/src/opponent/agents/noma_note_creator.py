@@ -6,29 +6,28 @@ from ..prompts.noma_prompts import NOMA_PROMPTS
 from ..structs.note import Resource, NoMaNote, NoteTags, NoteTitle
 from ..misc.markdown_tools import MDBuilder
 from langchain_ollama import ChatOllama
-from langchain_core.output_parsers import PydanticOutputParser
 
 
 class NoMaState(TypedDict):
     """# State for the NoMa note-making workflow.
 
     ## Input: User's responses to the 5 prompts
-    interesting: str  # "That's interesting" response
-    reminds_me: str  # "That reminds me" response
-    similar_because: str  # "It's similar because" response
-    different_because: str  # "It's different because" response
-    important_because: str  # "It's important because" response
+    `interesting`: str  # "That's interesting" response
+    `reminds_me`: str  # "That reminds me" response
+    `similar_because`: str  # "It's similar because" response
+    `different_because`: str  # "It's different because" response
+    `important_because`: str  # "It's important because" response
 
     ## Processing flags
-    has_internet: bool  # Whether internet access is available
+    `has_internet`: bool  # Whether internet access is available
 
     ## Output: Generated content
-    synthesized_note: Optional[str]  # The coherent note
-    note_title: Optional[str]  # The generated title
-    topic_tags: Optional[list[str]]  # Topic tags (without #t/ prefix)
-    resources: Optional[list[dict]]  # List of {title, url, reason} dicts
-    final_output: Optional[str]  # The formatted final output
-    output_file_name: Optional[str]  # Suggested file name for the note
+    `synthesized_note`: Optional[str]  # The coherent note
+    `note_title`: Optional[str]  # The generated title
+    `topic_tags`: Optional[list[str]]  # Topic tags (without #t/ prefix)
+    `resources`: Optional[list[dict]]  # List of {title, url, reason} dicts
+    `final_output`: Optional[str]  # The formatted final output
+    `output_file_name`: Optional[str]  # Suggested file name for the note
     """
     interesting: str  
     reminds_me: str  
@@ -52,8 +51,8 @@ class NomaNoteCreator:
         Initialize the Noma note creator agent.
 
         Args:
-            ollama_model: Name of the Ollama model to use
-            prompts: Dictionary of Noma method prompts
+            `ollama_model`: Name of the Ollama model to use
+            `prompts`: Dictionary of Noma method prompts
         """
         self.ollama_model = ollama_model
         self.prompts = prompts
@@ -93,6 +92,8 @@ class NomaNoteCreator:
                 )
         self.graph.add_edge("fetch_resources", "format_output")
         self.graph.add_edge("format_output", END)
+
+        # Compile
         self.app = self.graph.compile()
 
 
