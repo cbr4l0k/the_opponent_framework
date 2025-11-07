@@ -1,36 +1,106 @@
 # The Opponent Framework
 
-A three-stage AI-powered system that helps create structured notes using the Noma method, automatically links them within your Obsidian second brain, and then challenges your arguments using an adversarial AI agent. Built to combat echo chambers by providing systematic opposition to your ideas using relevant sources.
 
-## Why This Exists
+> *"The best ideas survive opposition; the rest get refined."*
 
-Modern social media and AI systems create echo chambers that reinforce existing beliefs rather than challenge them. It's increasingly difficult to find people who will genuinely question your assumptions or point out flaws in your reasoning. The Opponent Framework addresses this by:
+A three-stage AI-powered system that helps create structured notes using the [Noma method](https://www.youtube.com/watch?v=SAsZDg2l1R0), automatically links them within your Obsidian second brain, and then challenges your arguments using an adversarial AI agent. Built to combat echo chambers by providing systematic opposition to your ideas using relevant sources from your own knowledge base.
 
-1. **Structured Note Creation**: Uses the Noma method with AI assistance to create well-formed notes from your initial thoughts
-2. **Intelligent Linking**: Automatically finds connections between your new note and existing notes in your Obsidian vault using RAG (Retrieval-Augmented Generation)
-3. **Adversarial Opposition**: An AI agent that finds holes in your arguments, questions your assumptions, and challenges your ideas using relevant sources from your own knowledge base
+**Current Version**: REST API interface
+**Next Version**: Telegram bot integration (coming soon)
 
-The goal isn't to win arguments but to strengthen thinking by exposing it to systematic opposition.
+---
 
-## Architecture
+## The Story: Why This Exists
 
-### Tech Stack
+<img src="assets/001_i_like_and_hate.png"></img>
+
+### The Problem I Faced
+
+I noticed something disturbing: every AI assistant I used would agree with me. Every social media feed would show me content that confirmed what I already believed. Even when I actively sought out opposing views, they were weak strawmen that made my original position feel stronger.
+
+**I wasn't getting smarter. I was getting more convinced.**
+
+The problem wasn't just social media algorithms or AI training data. It was deeper: *nobody wants to argue with you anymore*. Finding someone who will genuinely challenge your assumptions, point out logical flaws, and force you to defend your ideas with evidence is rare. And when you do find that person, they often lack the context of your specific knowledge base and thought process.
+
+I needed an opponent. Not a debate partner trying to win, but a systematic challenger with one job: **find the holes in my thinking**.
+
+<img src="assets/002_echo_chamber.png"></img>
+
+### The First Prototype: Bash Scripts, Claude, and Git
+
+My first solution was beautifully hacky. I wrote a bash script that:
+- Made requests to my local Ollama endpoints for note creation
+- Pushed my Obsidian vault to Git
+- Used Claude Projects with opponent instructions baked into its memory
+- Had Claude fetch my notes from Git to challenge my arguments
+
+**And honestly? Claude was *incredible* at being an opponent.** It found nuances I missed, questioned assumptions I didn't know I had, and cited my own notes back at me in ways that made me reconsider entire frameworks.
+
+<img src="assets/003_why_so_stupid.png"></img>
+
+### Why I Rebuilt It
+
+But I had a problem: **privacy**.
+
+Every note I sent to Claude was leaving my machine. My personal thoughts, half-formed ideas, sensitive observations about work and life - all being sent to Anthropic's servers. Sure, they have a good privacy policy, but I wasn't comfortable with it. Plus, I wanted to formalize the system, make it more robust, and learn to build agent-based systems properly.
+
+So I rebuilt everything from scratch:
+- Replaced Claude with local Ollama models (privacy-first, zero external API calls)
+- Built a proper FastAPI backend instead of bash scripts
+- Implemented RAG with ChromaDB to keep everything local
+- Designed it as a framework, not just a personal tool
+
+**The tradeoff?** Local models aren't as good as Claude at the opponent role. But they're private, free, and improving rapidly. And the framework is solid enough that when local models catch up, the system will just get better.
+
+<img src="assets/004_ollama_o_claude.png"></img>
+
+### What's Missing (For Now)
+
+The original design included internet search - the opponent could pull counter-evidence from the web, not just your vault. I haven't implemented that yet because:
+1. I wanted to nail the core local-first functionality first
+2. Most valuable challenges come from your *own knowledge base* - things you wrote but forgot, or contradictions between your notes
+3. Internet search introduces privacy concerns again (DNS queries, API calls)
+
+But it's coming. The architecture supports it.
+
+### This Is Both a Framework and a Tool
+
+Here's the important part: **the system doesn't matter as much as the habit**.
+
+Whether you use this framework, my original bash scripts, or just manually search your notes for counterarguments - the value is in *doing the work* to challenge your own ideas. The Opponent Framework just makes that easier, more systematic, and harder to skip.
+
+The goal isn't to win arguments. It's to strengthen thinking by exposing it to systematic opposition.
+
+<img src="assets/005_current_opponent.png"></img>
+
+---
+
+## How It Works
+
+The Opponent Framework operates in three stages:
+
+1. **Structured Note Creation**: Uses the Noma method with AI assistance to create well-formed notes from your 5 reflections (what's interesting, what it reminds you of, similarities, differences, and importance)
+
+2. **Intelligent Linking**: Automatically finds connections between your new note and existing notes in your Obsidian vault using RAG (Retrieval-Augmented Generation) with semantic search
+
+3. **Adversarial Opposition**: An AI agent retrieves counter-evidence from your knowledge base, analyzes your claim for weaknesses, and challenges your arguments using only evidence from your own notes - no subjective opinions
+
+## Tech Stack
 
 **Backend (Python):**
 - **LangGraph/LangChain**: Orchestrates the three-stage pipeline and manages agent workflows
 - **ChromaDB**: Vector database for RAG operations on markdown files
 - **Ollama**: Local open-source LLM inference (privacy-first, no API costs)
-- **FastAPI**: REST API for frontend communication
+- **FastAPI**: REST API for client communication. Also, was made by a Colombian!
 - **uv**: Fast Python package management and virtual environment handling
 
-**Frontend (TypeScript/Vite):**
-- **Vite + React**: Fast development and optimized production builds
-- **TailwindCSS**: Utility-first styling
-- **WebSocket support**: Real-time streaming of LLM responses
-
 **Infrastructure:**
-- **Docker Compose**: Single-command deployment of all services
+- **Docker Compose**: Single-command deployment of backend services
 - **Multi-stage Docker builds**: Optimized images for production
+
+**Coming in Next Version:**
+- **python-telegram-bot**: Direct Telegram bot integration (more secure than webhook approach)
+- **Telegram Bot Interface**: Native bot commands for note creation, linking, and opponent interactions
 
 ### Key Design Decisions
 
@@ -38,78 +108,16 @@ The goal isn't to win arguments but to strengthen thinking by exposing it to sys
 - **ChromaDB for RAG**: Lightweight, embedded vector database with good Python integration. Alternative to heavier solutions like Pinecone or Weaviate
 - **LangGraph over raw LangChain**: Better state management for multi-stage workflows with conditional branching
 - **uv over pip/poetry**: 10-100x faster package resolution and installation
-- **Monorepo structure**: Backend and frontend in same repository for easier development and deployment
-
-## Project Structure
-
-```
-the_opponent_framework/
-├── backend/                    # Python backend
-│   ├── src/
-│   │   └── opponent/
-│   │       ├── __init__.py
-│   │       ├── main.py        # FastAPI application entry
-│   │       ├── api/           # API endpoints
-│   │       │   ├── __init__.py
-│   │       │   ├── notes.py   # Note creation endpoints
-│   │       │   ├── links.py   # Note linking endpoints
-│   │       │   └── opponent.py # Opponent chat endpoints
-│   │       ├── agents/        # LangGraph agents
-│   │       │   ├── __init__.py
-│   │       │   ├── noma_note_creator.py
-│   │       │   ├── note_linker.py
-│   │       │   └── opponent_agent.py
-│   │       ├── rag/           # RAG implementation
-│   │       │   ├── __init__.py
-│   │       │   ├── vectorstore.py
-│   │       │   └── retrieval.py
-│   │       ├── config/        # Configuration management
-│   │       │   ├── __init__.py
-│   │       │   └── settings.py
-│   │       └── prompts/       # Prompt templates
-│   │           ├── __init__.py
-│   │           ├── noma_prompts.py
-│   │           └── opponent_prompts.py
-│   ├── tests/
-│   │   └── __init__.py
-│   ├── pyproject.toml
-│   ├── Dockerfile
-│   └── .env.example
-├── frontend/                   # Vite + React frontend
-│   ├── src/
-│   │   ├── main.tsx
-│   │   ├── App.tsx
-│   │   ├── components/
-│   │   │   ├── NoteCreator.tsx
-│   │   │   ├── NoteLinking.tsx
-│   │   │   └── OpponentChat.tsx
-│   │   ├── services/
-│   │   │   └── api.ts         # Backend API client
-│   │   ├── hooks/
-│   │   │   └── useWebSocket.ts
-│   │   └── types/
-│   │       └── index.ts
-│   ├── public/
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── tsconfig.json
-│   └── tailwind.config.js
-├── docker-compose.yml          # Orchestrates all services
-├── .gitignore
-├── .pre-commit-config.yaml
-└── README.md
-```
+- **REST API First**: Clean API design allows for flexible client implementations (CLI, web UI, or future Telegram bot)
 
 ## Installation
 
 ### Prerequisites
 
 - **Python 3.11+** (for backend)
-- **Node.js 18+** (for frontend)
 - **Docker & Docker Compose** (recommended for easy deployment)
 - **Ollama** installed locally or accessible via network
 - **uv** (Python package manager): `curl -LsSf https://astral.sh/uv/install.sh | sh`
-- **pnpm** (Node package manager): `npm install -g pnpm`
 
 ### Option 1: Docker Compose (Recommended)
 
@@ -120,20 +128,31 @@ cp backend/.env.example backend/.env
 # Edit backend/.env with your configuration
 ```
 
-2. Ensure Ollama is running and has the desired model:
+**Important Docker Configuration:**
+- `VAULT_PATH_HOST`: Absolute path to your Obsidian vault on your host machine (e.g., `/home/user/Documents/obsidian`)
+- `OLLAMA_BASE_URL`:
+  - **Mac/Windows (Docker Desktop)**: Use `http://host.docker.internal:11434` (default)
+  - **Linux**: Use `http://172.17.0.1:11434` or your host IP
+- The container will mount your vault as read-only to `/obsidian` inside the container
+
+2. Ensure Ollama is running on your host and has the desired model:
 ```bash
 ollama pull llama3.1  # or your preferred model
+ollama serve  # Make sure Ollama is running
 ```
 
-3. Start all services:
+3. Start the backend service:
 ```bash
 docker-compose up --build
 ```
 
-The application will be available at:
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8000
-- API docs: http://localhost:8000/docs
+The backend API will be available at http://localhost:8000
+
+**For Linux users**: If the default Ollama URL doesn't work, find your Docker bridge IP:
+```bash
+ip addr show docker0 | grep inet
+# Use the IP address in OLLAMA_BASE_URL
+```
 
 ### Option 2: Manual Setup (Development)
 
@@ -141,28 +160,21 @@ The application will be available at:
 ```bash
 cd backend
 uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+source .venv/bin/activate 
 uv pip install -e ".[dev]"
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
-**Frontend:**
+**Run development server:**
 ```bash
-cd frontend
-pnpm install
-```
-
-**Run development servers:**
-```bash
-# Terminal 1 - Backend
 cd backend
 uv run uvicorn opponent.main:app --reload --host 0.0.0.0 --port 8000
-
-# Terminal 2 - Frontend
-cd frontend
-pnpm dev
 ```
+
+### Setting Up Your Telegram Bot (Coming in Next Version)
+
+The Telegram bot integration will be available in the next release. For now, interact with the API directly using HTTP clients, cURL, or build your own client interface.
 
 ## Configuration
 
@@ -174,16 +186,15 @@ OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.1
 
 # ChromaDB Configuration
-CHROMA_PERSIST_DIRECTORY=./data/chroma
-CHROMA_COLLECTION_NAME=obsidian_notes
+CHROMA_PERSIST_DIR=./data/chroma
+CHROMA_COLLECTION=obsidian_notes
 
 # Obsidian Vault Path
-OBSIDIAN_VAULT_PATH=/path/to/your/obsidian/vault
+VAULT_PATH=/path/to/your/obsidian/vault
 
 # API Configuration
 API_HOST=0.0.0.0
 API_PORT=8000
-CORS_ORIGINS=http://localhost:5173
 
 # Vector Search Configuration
 CHUNK_SIZE=512
@@ -193,122 +204,131 @@ TOP_K_RESULTS=5
 
 ## Usage
 
+Interact with the Opponent Framework through the REST API. Once the backend is running, you can use any HTTP client (cURL, Postman, HTTPie, or build your own client) to interact with the endpoints:
+
 ### 1. Note Creation (Noma Method)
 
-Navigate to the "Create Note" section in the web interface:
-- Enter your initial thoughts or ideas
-- The AI uses your custom Noma method prompts to structure the note
-- Review and edit the generated note
-- Save to your Obsidian vault
+Send a POST request with the 5 Noma reflections to create a structured note:
+- Provide your 5 reflections: what's interesting, what it reminds you of, why it's similar, why it's different, why it's important
+- AI synthesizes your reflections into a coherent note with title, tags, and markdown
+- Returns the complete note ready to save to your Obsidian vault
+
+**Example with cURL:**
+```bash
+curl -X POST http://localhost:8000/api/notes/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "interesting": "I find it fascinating how distributed systems handle consensus...",
+    "reminds_me": "This reminds me of how communities make decisions without central authority...",
+    "similar_because": "Both require agreement between independent parties without a leader...",
+    "different_because": "Computer systems can verify truth mathematically, humans cannot...",
+    "important_because": "Understanding this helps design better collaborative tools...",
+    "has_internet": false
+  }'
+```
 
 ### 2. Note Linking
 
-After creating a note:
-- The system automatically scans your Obsidian vault
-- RAG finds semantically similar notes and concepts
-- Suggests links and connections
-- You can approve or modify suggested links
-- Links are added to the markdown file in Obsidian format
+Find related notes to link:
+- System uses RAG to find semantically similar notes in your vault
+- Returns suggested links with relevance scores and reasons
+- You can then manually add the links to your note
+
+**Example with cURL:**
+```bash
+curl -X POST http://localhost:8000/api/links/find \
+  -H "Content-Type: application/json" \
+  -d '{
+    "note_path": "vault/my_note.md",
+    "note_content": "Your note content here...",
+    "max_links": 5
+  }'
+```
 
 ### 3. The Opponent
 
-Access the "Opponent" chat interface:
-- The agent can either:
-  - Retrieve a specific note by name/topic
-  - Select a random note tagged with `#opponent`
-- The agent reads the note and linked context
-- Challenges arguments, finds logical holes, questions assumptions
-- Provides opposition using relevant sources from your vault
-- No subjective opinions - only evidence-based challenges
+Challenge a claim with evidence-based opposition:
+- Provide a note or claim to challenge
+- The agent retrieves counter-evidence from your knowledge base
+- Returns detailed analysis with logical challenges
+- Uses only evidence from your vault - no subjective opinions
+
+**Example with cURL:**
+```bash
+curl -X POST http://localhost:8000/api/opponent/challenge \
+  -H "Content-Type: application/json" \
+  -d '{
+    "note_content": "Your claim or argument here...",
+    "note_path": "vault/optional_note.md",
+    "context": "Optional additional context...",
+    "max_evidence": 5
+  }'
+```
+
+### 4. Vault Management
+
+Index your Obsidian vault for RAG operations:
+- Scans all markdown files in your vault
+- Creates embeddings and stores in ChromaDB
+- Required before using linking or opponent features
+
+**Example with cURL:**
+```bash
+curl -X POST http://localhost:8000/api/vault/index \
+  -H "Content-Type: application/json" \
+  -d '{"vault_path": "/path/to/your/obsidian/vault"}'
+```
 
 ## API Endpoints
 
+The backend exposes a REST API for any clients you want to build (CLI tools, web interfaces, mobile apps, or the future Telegram bot):
+
 ### Note Creation
 - `POST /api/notes/create` - Create a new note using Noma method
-  - Body: `{ "initial_thoughts": "your text" }`
-  - Returns: Structured note content
+  - Body: `{ "interesting": "...", "reminds_me": "...", "similar_because": "...", "different_because": "...", "important_because": "...", "has_internet": false }`
+  - Returns: `{ "title": "...", "tags": [...], "content": "...", "markdown": "...", "filename": "..." }`
+
+- `GET /api/notes/health` - Check note creation service health
 
 ### Note Linking
 - `POST /api/links/find` - Find potential links for a note
-  - Body: `{ "note_content": "...", "note_path": "..." }`
-  - Returns: List of suggested links with relevance scores
+  - Body: `{ "note_path": "...", "note_content": "...", "max_links": 5 }`
+  - Returns: `{ "note_path": "...", "suggested_links": [...], "summary": "...", "count": 0 }`
 
-- `POST /api/links/apply` - Apply selected links to note
-  - Body: `{ "note_path": "...", "links": [...] }`
-  - Returns: Updated note content
+- `GET /api/links/health` - Check note linking service health
 
-### Opponent Chat
-- `POST /api/opponent/chat` - Start or continue opponent conversation
-  - Body: `{ "message": "...", "note_id": "..." (optional) }`
-  - Returns: Opponent's response with sources
+### Opponent
+- `POST /api/opponent/challenge` - Challenge a claim with evidence-based opposition
+  - Body: `{ "note_content": "...", "note_path": "..." (optional), "context": "..." (optional), "max_evidence": 5 }`
+  - Returns: `{ "summary": "...", "detailed_analysis": "...", "counter_evidence": [...], "evidence_count": 0 }`
 
-- `GET /api/opponent/random-note` - Get a random #opponent tagged note
-  - Returns: Note content and metadata
+- `GET /api/opponent/health` - Check opponent service health
 
-- `WebSocket /ws/opponent` - Real-time streaming chat
+### Vault Management
+- `POST /api/vault/index` - Index a vault directory into ChromaDB
+  - Body: `{ "vault_path": "/path/to/vault" }`
+  - Returns: `{ "total_notes": 0, "total_chunks": 0, "vault_path": "..." }`
 
-### Health
-- `GET /health` - Health check endpoint
+- `GET /api/vault/health` - Check vault service health
+
+### General
+- `GET /` - API information and available endpoints
+- `GET /health` - Global health check endpoint
+- `GET /docs` - Interactive API documentation (Swagger UI)
 
 ## Development
 
-### Pre-commit Hooks
-
-Install pre-commit hooks for code quality:
-```bash
-pip install pre-commit
-pre-commit install
-```
-
-This runs automatically on commit:
-- **Python**: ruff (linting), black (formatting), mypy (type checking)
-- **TypeScript**: eslint (linting), prettier (formatting)
-
-### Running Tests
-
-**Backend:**
-```bash
-cd backend
-uv run pytest
-```
-
-**Frontend:**
-```bash
-cd frontend
-pnpm test
-```
-
 ### Adding Custom Prompts
 
-Edit `backend/src/opponent/prompts/noma_prompts.py` to customize the note creation process. The framework is designed to be flexible with your specific Noma method implementation.
+Edit `backend/src/opponent/prompts/opponent_prompts.py` to customize the note creation process and opponent behavior. The framework is designed to be flexible with your specific Noma method implementation.
 
-## Deployment
-
-### Docker Production Build
-
-```bash
-docker-compose -f docker-compose.prod.yml up -d
-```
-
-### Standalone Deployment
-
-The application can be deployed on any system with:
-- Docker support (easiest)
-- Python 3.11+ and Node.js 18+ (manual)
-- Ollama accessible via network (can be on same or different machine)
-
-For production:
-1. Set `CORS_ORIGINS` to your frontend domain
-2. Use a reverse proxy (nginx/traefik) for HTTPS
-3. Configure Ollama with adequate resources (8GB+ RAM, GPU recommended)
-4. Backup ChromaDB data directory regularly
 
 ## Customization
 
 ### Using Different LLM Models
 
 Change the `OLLAMA_MODEL` in `.env` to any Ollama-supported model:
-- `llama3.1` - Balanced performance and quality
+- `phi3:3.8b` - Smaller, good for low-resource setups (like my laptop)
 - `mistral` - Faster, good for quick iterations
 - `mixtral` - Better reasoning for complex arguments
 - `codellama` - If working with code-heavy notes
@@ -328,13 +348,18 @@ Adjust vector search parameters in `.env`:
 - If using Docker, ensure network connectivity
 
 **ChromaDB errors:**
-- Check `CHROMA_PERSIST_DIRECTORY` has write permissions
+- Check `CHROMA_PERSIST_DIR` has write permissions
 - Clear and rebuild: delete the directory and restart
 
-**Frontend can't connect to backend:**
-- Verify `CORS_ORIGINS` includes your frontend URL
-- Check both services are running
-- Inspect browser console for specific errors
+**API connection issues:**
+- Verify the backend service is running on the expected port
+- Check firewall rules if connecting remotely
+- Review logs for any startup errors
+- Test with a simple curl command to `/health` endpoint
+
+**Obsidian vault access:**
+- Verify `VAULT_PATH` is correct and accessible
+- Check file permissions for read/write access
 
 ## License
 
@@ -347,6 +372,8 @@ Contributions welcome! This project is designed to be extensible:
 - Improve linking algorithms
 - Enhance opponent reasoning strategies
 - Add new data sources beyond Obsidian
+- Build client interfaces (CLI, web UI, mobile apps)
+- Help implement the Telegram bot integration (coming soon!)
 
 ---
 
