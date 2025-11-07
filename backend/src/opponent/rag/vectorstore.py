@@ -4,15 +4,14 @@ from pathlib import Path
 from typing import Any
 import chromadb
 from chromadb.config import Settings as ChromaSettings
-from numpy import where
 from sentence_transformers import SentenceTransformer
 import frontmatter
 
 class VectorStore:
     """Manages ChromaDB vectorstore for Obsidian notes."""
 
-    def __init__(self, 
-                 persist_directory: str, 
+    def __init__(self,
+                 persist_directory: str,
                  collection_name: str,
                  embedding_model_name: str
                  ) -> None:
@@ -102,7 +101,7 @@ class VectorStore:
         vault = Path(vault_path)
         if not vault.exists() or not vault.is_dir():
             raise ValueError(f"Vault path {vault_path} does not exist or is not a directory.")
-        
+
         # Let's search for the files in the directories
         markdown_files = list(vault.rglob("*.md"))
 
@@ -176,7 +175,7 @@ class VectorStore:
         where_filter = filter_metadata if filter_metadata else None
 
         # Query ChromaDB
-        query_args = { 
+        query_args = {
                       "query_embeddings": [query_embedding],
                       "n_results": top_k,
                       "include": ["documents", "metadatas", "distances"],
@@ -195,6 +194,7 @@ class VectorStore:
                 results.get("documents", [[]])[0], # type: ignore
                 results.get("metadatas", [[]])[0], # type: ignore
                 results.get("distances", [[]])[0], # type: ignore
+                strict=True
                 ):
             formatted_results.append({
                 "content": doc,

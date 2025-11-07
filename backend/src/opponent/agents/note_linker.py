@@ -1,30 +1,30 @@
 """LangGraph agent for finding and creating links between notes."""
 
-from typing import Optional, TypedDict
 from langgraph.graph import StateGraph, END
+from typing import TypedDict
 from ..rag import Retriever
 
 MAX_CHARS_REASON = 200
 
 class NoteLinkState(TypedDict):
     """# State for the note linking workflow.
- 
+
     ## Input
     `note_path`: str  # Path to the note file
     `note_content`: str  # Content of the note to find links for
- 
+
     ## Processing
     `max_links`: int  # Maximum number of links to suggest (default: 5)
- 
+
     ## Output
-    `suggested_links`: Optional[list[dict]]  # List of {path, title, reason, score} dicts
-    `link_summary`: Optional[str]  # Human-readable summary of suggestions
+    `suggested_links`: list[dict] | None  # List of {path, title, reason, score} dicts
+    `link_summary`: str | None  # Human-readable summary of suggestions
     """
     note_path: str
     note_content: str
     max_links: int
-    suggested_links: Optional[list[dict]]
-    link_summary: Optional[str]
+    suggested_links: list[dict] | None
+    link_summary: str | None
 
 
 class NoteLinker:
@@ -62,14 +62,14 @@ class NoteLinker:
         """`Node`: Validate that required inputs are provided."""
         if not state.get("note_path"):
             raise ValueError("Missing required field: note_path")
- 
+
         if not state.get("note_content"):
             raise ValueError("Missing required field: note_content")
- 
+
         # Set default max_links if not provided
         if not state.get("max_links"):
             state["max_links"] = self.max_links
- 
+
         return state
 
     async def find_links( self, state: NoteLinkState) -> NoteLinkState:
@@ -79,7 +79,7 @@ class NoteLinker:
                 exclude_path=state.get("note_path"),
                 )
 
-        # Formatting 
+        # Formatting
         suggested_links = []
         for result in results[: state.get("max_links")]:
             metadata = result.get("metadata", {})
@@ -89,22 +89,22 @@ class NoteLinker:
                 "reason": result.get("snippet", "")[:MAX_CHARS_REASON],
                 "score": result.get("score", -1),
             })
-        
+
         state["suggested_links"] = suggested_links
         return state
 
     async def format_suggestions(self, state: NoteLinkState) -> NoteLinkState:
         """`Node`: Format link suggestions into a human-readable summary."""
-        link = state.get("suggested_links", [])
+        links = state.get("suggested_links", [])
 
-        if not link:
+        if not links:
             state["link_summary"] = "No related notes found for linking."
             return state
 
         summary_lines = [
-                f"Found {len(link)} related note(s) for linking:",
+                f"Found {len(links)} related note(s) for linking:",
                 ]
-        for idx, link in enumerate(link, start=1):
+        for idx, link in enumerate(links, start=1):
             title = link.get("title")
             path = link.get("path")
             score = link.get("score")
@@ -120,7 +120,7 @@ class NoteLinker:
     async def run(self, note_path: str, note_content: str, max_links: int | None = None) -> NoteLinkState:
         """
         Run the note linking workflow.
- 
+
         Args:
             `note_path`: Path to the note file
             `note_content`: Content of the note

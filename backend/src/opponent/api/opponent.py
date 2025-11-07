@@ -1,7 +1,6 @@
 """API endpoints for the adversarial opponent agent."""
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import Optional
 
 from ..agents import OpponentAgent
 from ..rag import Retriever
@@ -14,40 +13,40 @@ from ..rag import Retriever
 
 class OpponentRequest(BaseModel):
     """Request model for challenging a claim with the opponent."""
- 
+
     note_content: str = Field(
         ...,
         description="The note or claim to challenge",
         min_length=10
     )
-    note_path: Optional[str] = Field(
+    note_path: str | None = Field(
         default=None,
         description="Optional path to exclude from counter-evidence"
     )
-    context: Optional[str] = Field(
+    context: str | None = Field(
         default=None,
         description="Additional context about the claim"
     )
-    max_evidence: Optional[int] = Field(
+    max_evidence: int | None = Field(
         default=5,
         ge=1,
         le=10,
         description="Maximum pieces of counter-evidence to use"
     )
- 
- 
+
+
 class CounterEvidence(BaseModel):
     """A piece of counter-evidence from the knowledge base."""
- 
+
     content: str = Field(..., description="The counter-evidence text")
     source: str = Field(..., description="Source note title")
     path: str = Field(..., description="Path to the source note")
     score: float = Field(..., description="Relevance score")
- 
- 
+
+
 class OpponentResponse(BaseModel):
     """Response model from the opponent."""
- 
+
     summary: str = Field(..., description="Concise summary of opposition (2-3 sentences)")
     detailed_analysis: str = Field(..., description="Detailed challenge to the arguments")
     counter_evidence: list[CounterEvidence] = Field(..., description="Sources used for opposition")
@@ -60,15 +59,15 @@ class OpponentResponse(BaseModel):
 
 
 router = APIRouter(prefix="/api/opponent", tags=["opponent"])
- 
+
 # Global instances (initialized in main.py)
-opponent_agent: Optional[OpponentAgent] = None
- 
- 
+opponent_agent: OpponentAgent | None = None
+
+
 def initialize_opponent(retriever: Retriever, ollama_model: str, max_evidence: int = 5):
     """
     Initialize the opponent agent.
- 
+
     Args:
         `retriever`: Retriever instance for finding counter-evidence
         `ollama_model`: Name of the Ollama model to use
@@ -93,12 +92,12 @@ def initialize_opponent(retriever: Retriever, ollama_model: str, max_evidence: i
 async def challenge_claim(request: OpponentRequest):
     """
     Challenge a claim or note with evidence-based opposition.
- 
+
     The opponent agent:
     1. Retrieves counter-evidence from your knowledge base
     2. Analyzes the claim for weaknesses and gaps
     3. Provides systematic challenges using only evidence (no opinions)
- 
+
     Args:
         `request`: The claim to challenge and configuration
     Returns:
@@ -111,7 +110,7 @@ async def challenge_claim(request: OpponentRequest):
             status_code=500,
             detail="Opponent agent not initialized. Check server configuration."
         )
- 
+
     try:
         # Run the opponent workflow
         result = await opponent_agent.run(
@@ -120,7 +119,7 @@ async def challenge_claim(request: OpponentRequest):
             context=request.context,
             max_evidence=request.max_evidence
         )
- 
+
         # Format counter-evidence
         counter_evidence = [
             CounterEvidence(
@@ -131,7 +130,7 @@ async def challenge_claim(request: OpponentRequest):
             )
             for evidence in (result["counter_evidence"] or [])
         ]
- 
+
         # Build response
         response = OpponentResponse(
             summary=result["summary"] or "No opposition available.",
@@ -139,21 +138,21 @@ async def challenge_claim(request: OpponentRequest):
             counter_evidence=counter_evidence,
             evidence_count=len(counter_evidence)
         )
- 
+
         return response
- 
+
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"Failed to challenge claim: {str(e)}"
-        )
- 
- 
+        ) from e
+
+
 @router.get("/health")
 async def health_check():
     """
     Check if the opponent service is healthy.
- 
+
     Returns:
         Health status and configuration
     """
@@ -162,7 +161,7 @@ async def health_check():
             "status": "unhealthy",
             "message": "Opponent agent not initialized"
         }
- 
+
     return {
         "status": "healthy",
         "message": "Opponent service is ready",

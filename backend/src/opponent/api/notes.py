@@ -1,7 +1,6 @@
 """API endpoints for note creation using the Noma method."""
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import Optional
 
 from ..agents import NomaNoteCreator
 
@@ -60,17 +59,17 @@ class NoMaRequests(BaseModel):
 
 class NoMaResponse(BaseModel):
     """Response model for a created note."""
- 
+
     title: str = Field(..., description="Generated title for the note")
     tags: list[str] = Field(..., description="Topic tags for the note")
     content: str = Field(..., description="The synthesized note content")
-    resources: Optional[list[dict]] = Field(None, description="External resources (if has_internet=True)")
+    resources: list[dict] | None = Field(None, description="External resources (if has_internet=True)")
     markdown: str = Field(..., description="Complete markdown with frontmatter")
     filename: str = Field(..., description="Suggested filename for the note")
 
 class HealthResponse(BaseModel):
     """Health check response."""
- 
+
     status: str = Field(..., description="Service status")
     message: str = Field(..., description="Status message")
 
@@ -83,12 +82,12 @@ class HealthResponse(BaseModel):
 router = APIRouter(prefix="/api/notes", tags=["notes"])
 
 # Global agent instance (initialized in main.py)
-noma_creator: Optional[NomaNoteCreator] = None
+noma_creator: NomaNoteCreator | None = None
 
 def initialize_note_creator(ollama_model: str):
     """
     Initialize the NoMa note creator agent.
- 
+
     Args:
         `ollama_model`: Name of the Ollama model to use
     Note:
@@ -106,14 +105,14 @@ def initialize_note_creator(ollama_model: str):
 @router.post("/create", response_model=NoMaResponse)
 async def create_note(request: NoMaRequests) -> NoMaResponse:
     """Create a structured note using the NoMa method.
- 
+
     The NoMa method transforms your 5 reflections into a coherent note:
     1. What's interesting
     2. What it reminds you of
     3. Why it's similar
     4. Why it's different
     5. Why it's important
- 
+
     Args:
         `request`: NoMa reflections and configuration
     Returns:
@@ -156,14 +155,14 @@ async def create_note(request: NoMaRequests) -> NoMaResponse:
         raise HTTPException(
             status_code=500,
             detail=f"Error creating note: {str(e)}"
-        )
+        ) from e
 
 
 @router.get("/health", response_model=HealthResponse)
 async def health_check():
     """
     Check if the note creation service is healthy.
- 
+
     Returns:
         HealthResponse with service status
     """
@@ -172,7 +171,7 @@ async def health_check():
             status="unhealthy",
             message="Note creator not initialized"
         )
- 
+
     return HealthResponse(
         status="healthy",
         message="Note creation service is ready"

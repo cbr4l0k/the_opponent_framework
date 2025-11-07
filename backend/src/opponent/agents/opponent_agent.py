@@ -1,8 +1,8 @@
 """LangGraph agent for adversarial argument opposition."""
 
-from typing import Optional, TypedDict
-from langgraph.graph import StateGraph, END
 from langchain_ollama import ChatOllama
+from langgraph.graph import StateGraph, END
+from typing import TypedDict
 from ..rag import Retriever
 from ..prompts import OPPONENT_PROMPTS
 
@@ -13,31 +13,31 @@ class OpponentState(TypedDict):
 
     ## Input
     `note_content`: str  # The note/claim to challenge
-    `note_path`: Optional[str]  # Path to exclude from counter-evidence (optional)
-    `context`: Optional[str]  # Additional context about the claim (optional)
- 
+    `note_path`: str | None  # Path to exclude from counter-evidence (optional)
+    `context`: str | None  # Additional context about the claim (optional)
+
     ## Processing
     `max_evidence`: int  # Maximum pieces of counter-evidence to use (default: 5)
- 
+
     ## Output
     `counter_evidence`: Optional[list[dict]]  # List of opposing arguments from vault
-    `detailed_analysis`: Optional[str]  # Detailed challenge to the arguments
-    `summary`: Optional[str]  # Concise summary of opposition
+    `detailed_analysis`: str | None  # Detailed challenge to the arguments
+    `summary`: str | None  # Concise summary of opposition
     """
     note_content: str
-    note_path: Optional[str]
-    context: Optional[str]
+    note_path: str | None
+    context: str | None
     max_evidence: int
-    counter_evidence: Optional[list[dict]]
-    detailed_analysis: Optional[str]
-    summary: Optional[str]
+    counter_evidence: list[dict] | None
+    detailed_analysis: str | None
+    summary: str | None
 
 
 
 class OpponentAgent:
     """Agent for challenging arguments using evidence-based opposition.
 
-    - For now, it only works by using my own knowledge base via RAG. 
+    - For now, it only works by using my own knowledge base via RAG.
 		TODO: Integrate internet search for broader perspectives.
     """
 
@@ -84,14 +84,14 @@ class OpponentAgent:
 
     async def retrieve_counter_evidence(self, state: OpponentState) -> OpponentState:
         """`Node`: Retrieve evidence that opposes or challenges the claim."""
- 
+
         # Use the retriever's opposition-focused method
         results = await self.retriever.retrieve_for_opposition(
             claim=state["note_content"],
             context=state.get("context")
         )
- 
-        # Format 
+
+        # Format
         counter_evidence = []
         for result in results[:state["max_evidence"]]:
             metadata = result.get("metadata", {})
@@ -101,7 +101,7 @@ class OpponentAgent:
                 "path": metadata.get("path", ""),
                 "score": result.get("rerank_score", result.get("score", 0.0))
             })
- 
+
         state["counter_evidence"] = counter_evidence
         return state
 
@@ -140,7 +140,7 @@ class OpponentAgent:
             detailed_analysis=state["detailed_analysis"]
         )
         response = await self.llm.ainvoke(prompt)
-        state["summary"] = response.content 
+        state["summary"] = response.content
         return state
 
     async def run(
@@ -151,7 +151,7 @@ class OpponentAgent:
         max_evidence: int | None = None
     ) -> OpponentState:
         """Run the opponent workflow to challenge a claim.
- 
+
         Args:
             `note_content`: The note or claim to challenge
             `note_path`: Optional path to the note (for excluding from results)

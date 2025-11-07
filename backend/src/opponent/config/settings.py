@@ -103,7 +103,7 @@ class Settings(BaseSettings):
     def cors_origins_list(self) -> list[str]:
         """Parse CORS origins string into list."""
         return [
-                origin.strip() 
+                origin.strip()
                 for origin in self.cors_origins.split(",")
                 ]
 

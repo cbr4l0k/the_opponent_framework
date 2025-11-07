@@ -23,19 +23,19 @@ logger = logging.getLogger("uvicorn.error")
 async def lifespan(app: FastAPI):
     """
     Manage application startup and shutdown.
- 
+
     Startup:
         - Ensure required directories exist
         - Initialize RAG components (VectorStore, and Retriever)
         - Initialize all agents (NoMa, Linker, and Opponent)
- 
+
     Shutdown:
         - Cleanup resources (if needed)
     """
     # Startup
     logger.info("🚀 Starting Opponent Framework API...")
     settings.ensure_directories()
- 
+
     # Initialize RAG components
     logger.info("📚 Initializing RAG components...")
     vectorstore = VectorStore(
@@ -43,35 +43,35 @@ async def lifespan(app: FastAPI):
         collection_name=settings.chroma_collection,
         embedding_model_name=settings.embedding_model
     )
-    logger.info(f"✅ VectorStore initialized: {settings.chroma_collection}")
- 
+    logger.info("✅ VectorStore initialized: {settings.chroma_collection}")
+
     retriever = Retriever(
         vectorstore=vectorstore,
         ollama_model=settings.ollama_model,
         top_k=settings.top_k_results
     )
-    logger.info(f"✅ Retriever initialized with top_k={settings.top_k_results}")
- 
+    logger.info("✅ Retriever initialized with top_k={settings.top_k_results}")
+
     # Initialize agents
     logger.info("🤖 Initializing agents...")
     notes_api.initialize_note_creator(ollama_model=settings.ollama_model)
-    logger.info(f"✅ NoMa creator initialized")
- 
+    logger.info("✅ NoMa creator initialized")
+
     links_api.initialize_note_linker(retriever=retriever, max_links=settings.top_k_results)
-    logger.info(f"✅ Note linker initialized")
+    logger.info("✅ Note linker initialized")
 
     opponent_api.initialize_opponent(
         retriever=retriever,
         ollama_model=settings.ollama_model,
         max_evidence=settings.top_k_results
     )
-    logger.info(f"👹 Opponent initialized")
+    logger.info("👹 Opponent initialized")
 
     vault_api.initialize_vectorstore(vectorstore)
-    logger.info(f"✅ Vault service initialized")
+    logger.info("✅ Vault service initialized")
 
-    logger.info(f"✅ All systems ready! Model: {settings.ollama_model}")
-    logger.info(f"📖 API docs: http://{settings.api_host}:{settings.api_port}/docs")
+    logger.info("✅ All systems ready! Model: {settings.ollama_model}")
+    logger.info("📖 API docs: http://{settings.api_host}:{settings.api_port}/docs")
 
     yield
 
@@ -121,7 +121,7 @@ app.include_router(vault_api.router)
 async def root():
     """
     Root endpoint with API information.
- 
+
     Returns:
         Welcome message and available endpoints
     """
@@ -145,13 +145,13 @@ async def root():
             "global_health": "GET /health"
             }
     }
- 
- 
+
+
 @app.get("/health")
 async def health():
     """
     Global health check endpoint.
- 
+
     Returns:
         Overall API health status
     """

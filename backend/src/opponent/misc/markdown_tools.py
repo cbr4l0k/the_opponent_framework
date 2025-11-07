@@ -1,6 +1,4 @@
-from dataclasses import dataclass, field, fields
-from collections import defaultdict
-from typing import List
+from dataclasses import dataclass, field
 
 @dataclass
 class MDBuilder:
@@ -9,10 +7,10 @@ class MDBuilder:
     """
     title: str = ""
     # Tags:
-    #	| Source	<#s/>: opponent 
-    #	| Context	<#c/>: selftudy 
+    #	| Source	<#s/>: opponent
+    #	| Context	<#c/>: selftudy
     #	| Topic		<#t/>: Must be added separately
-    tags: List[str] = field(
+    tags: list[str] = field(
             default_factory=lambda: ["#s/opponent", "#c/selfstudy"]
             )
     content: str = ""

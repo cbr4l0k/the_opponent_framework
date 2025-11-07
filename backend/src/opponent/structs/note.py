@@ -1,10 +1,11 @@
+"""Models for different types of notes and their metadata."""
+
 from pydantic import BaseModel, Field
-from typing import Optional
 
 class Resource(BaseModel):
     """A resource linked to a note, such as a URL or document."""
     title: str
-    url: Optional[str] = None
+    url: str | None = None
     reason: str
 
 class NoteTitle(BaseModel):
@@ -18,4 +19,3 @@ class NoteTags(BaseModel):
 class NoMaNote(BaseModel):
     """A plain markdown text created using the Noma method. No titles, tags, or sections."""
     content: str
-    

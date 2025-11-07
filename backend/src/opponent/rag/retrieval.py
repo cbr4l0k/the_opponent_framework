@@ -43,7 +43,7 @@ class Retriever:
                 ))
         response = await self.llm.ainvoke(concept_prompt)
         concepts = response.content.strip()
-        
+
         # Search using those concepts
         results = self.vectorstore.search(
                 query=concepts,
@@ -88,7 +88,7 @@ class Retriever:
                 query=full_query,
                 top_k=self.top_k * 3,  # Get more results to filter
                 )
- 
+
         # Filter for tags containing "opponent"
         opponent_tagged = [
             result for result in all_results
@@ -135,7 +135,7 @@ class Retriever:
                 query="",
                 top_k=k * 3,
                 )
- 
+
         # Filter for tags containing the specified tag
         filtered_results = [
             result for result in all_results
@@ -166,15 +166,15 @@ class Retriever:
         rerank_prompt += "Return ONLY a JSON array of scores in order, like: [8, 3, 6, 9, 2]\nDo not include any explanation, just the array."
 
         response = await self.llm.ainvoke(rerank_prompt)
-        
-        try: 
+
+        try:
             # Parse scores
             import json
             scores = json.loads(response.content.strip())
 
             scored_results = [
                     {**result, 'rerank_score': score}
-                    for result, score in zip(results, scores)
+                    for result, score in zip(results, scores, strict=True)
                     ]
             scored_results.sort(key=lambda x: x['rerank_score'], reverse=True)
 
@@ -183,11 +183,3 @@ class Retriever:
           # If parsing fails, return original order
           print(f"⚠️  Failed to parse reranking scores, using original order: {e}")
           return results
-
-
-
-
-
-
-
-

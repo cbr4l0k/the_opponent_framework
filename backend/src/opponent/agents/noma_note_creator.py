@@ -1,13 +1,13 @@
 """LangGraph agent for creating notes using the Noma method."""
 
-import re
-from uuid import uuid4
-from typing import Literal, Optional, TypedDict
-from langgraph.graph import StateGraph, END
+from ..misc import MDBuilder
 from ..prompts import NOMA_PROMPTS
 from ..structs import Resource, NoMaNote, NoteTags, NoteTitle
-from ..misc import MDBuilder
 from langchain_ollama import ChatOllama
+from langgraph.graph import StateGraph, END
+from typing import Literal, TypedDict
+from uuid import uuid4
+import re
 
 
 class NoMaState(TypedDict):
@@ -24,25 +24,25 @@ class NoMaState(TypedDict):
     `has_internet`: bool  # Whether internet access is available
 
     ## Output: Generated content
-    `synthesized_note`: Optional[str]  # The coherent note
-    `note_title`: Optional[str]  # The generated title
-    `topic_tags`: Optional[list[str]]  # Topic tags (without #t/ prefix)
-    `resources`: Optional[list[dict]]  # List of {title, url, reason} dicts
-    `final_output`: Optional[str]  # The formatted final output
-    `output_file_name`: Optional[str]  # Suggested file name for the note
+    `synthesized_note`: str | None  # The coherent note
+    `note_title`: str | None  # The generated title
+    `topic_tags`: list[str] | None  # Topic tags (without #t/ prefix)
+    `resources`: list[dict] | None  # List of {title, url, reason} dicts
+    `final_output`: str | None  # The formatted final output
+    `output_file_name`: str | None  # Suggested file name for the note
     """
-    interesting: str  
-    reminds_me: str  
-    similar_because: str  
-    different_because: str  
-    important_because: str  
-    has_internet: bool  
-    synthesized_note: Optional[str]  
-    note_title: Optional[str]  
-    topic_tags: Optional[list[str]]  
-    resources: Optional[list[dict]]  
-    final_output: Optional[str]  
-    output_file_name: Optional[str]
+    interesting: str
+    reminds_me: str
+    similar_because: str
+    different_because: str
+    important_because: str
+    has_internet: bool
+    synthesized_note: str | None
+    note_title: str | None
+    topic_tags: list[str] | None
+    resources: list[dict] | None
+    final_output: str | None
+    output_file_name: str | None
 
 
 class NomaNoteCreator:
@@ -120,7 +120,7 @@ class NomaNoteCreator:
                 )
         structured_model = self.llm.with_structured_output(NoMaNote)
         note = await structured_model.ainvoke(prompt)
-        
+
         return {"synthesized_note": note.content} # type: ignore
 
     async def generate_title(self, state:NoMaState) -> NoMaState:
@@ -203,7 +203,7 @@ class NomaNoteCreator:
         return state
 
     async def should_fetch_resources(self, state: NoMaState) -> Literal["fetch_resources", "format_output"]:
-        """`Edge`: Decide whether to fetch resources based on internet availability.""" 
+        """`Edge`: Decide whether to fetch resources based on internet availability."""
 
         if state.get("has_internet", False):
             return "fetch_resources"
