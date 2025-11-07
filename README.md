@@ -1,6 +1,5 @@
 # The Opponent Framework
 
-
 > *"The best ideas survive opposition; the rest get refined."*
 
 A three-stage AI-powered system that helps create structured notes using the [Noma method](https://www.youtube.com/watch?v=SAsZDg2l1R0), automatically links them within your Obsidian second brain, and then challenges your arguments using an adversarial AI agent. Built to combat echo chambers by providing systematic opposition to your ideas using relevant sources from your own knowledge base.
