@@ -39,7 +39,6 @@ ENV/
 .coverage
 htmlcov/
 .tox/
-test_*
 
 # Type checking
 .mypy_cache/
@@ -62,6 +61,7 @@ logs/
 # ChromaDB data
 backend/data/
 data/
+*chroma*
 
 # Temporary files
 *.tmp

@@ -1,0 +1,114 @@
+🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪
+Testing Opponent Framework API
+🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪🧪
+
+Make sure the API is running:
+  cd backend && uv run opponent
+
+
+============================================================
+0. Setting up test vault with sample notes
+============================================================
+✅ Created: benefits_of_remote_work.md
+✅ Created: ai_job_displacement_concerns.md
+✅ Created: future_of_work.md
+
+✅ Test vault created at: /home/cbr4l0k/Documents/projects/the_opponent_framework/backend/test_vault
+✅ Sample notes: 5
+
+============================================================
+0.5. Indexing test vault
+============================================================
+
+Status Code: 200
+
+✅ Indexed 5 notes
+✅ Created 5 chunks
+✅ Vault path: /home/cbr4l0k/Documents/projects/the_opponent_framework/backend/test_vault
+
+============================================================
+1. Testing Health Endpoints
+============================================================
+
+✅ Global Health: 200
+{'status': 'healthy', 'message': 'Opponent Framework API is running', 'configuration': {'ollama_model': 'phi3:3.8b', 'vault_path': '/home/cbr4l0k/Documents/projects/the_opponent_framework/backend/test_vault/'}}
+
+✅ Notes Health: 200
+{'status': 'healthy', 'message': 'Note creation service is ready'}
+
+✅ Links Health: 200
+{'status': 'healthy', 'message': 'Note linking service is ready', 'max_links': 5}
+
+✅ Opponent Health: 200
+{'status': 'healthy', 'message': 'Opponent service is ready', 'max_evidence': 5, 'model': 'phi3:3.8b'}
+
+============================================================
+2. Testing Note Creation
+============================================================
+
+Status Code: 200
+
+✅ Title: Embracing AI's Workplace Transformation: Reskilling for Professional Evolution
+✅ Tags: echnology-workplace, job-security, skill-adaptation
+✅ Filename: embracing_ais_workplace_transformation_reskilling_for_professional_evolution.md
+
+✅ Content Preview:
+The advent of AI in transforming workplaces reflects a significant shift that echoes past revolutionary technological advancements, such as those seen during the industrial era. These transformations ...
+
+============================================================
+3. Testing Note Linking
+============================================================
+
+Status Code: 200
+
+✅ Found 3 related note(s)
+
+✅ Summary:
+Found 3 related note(s) for linking:
+1. [[AI's Transformational Impact on Employment: A Historical Perspective]]
+	- Path: /home/cbr4l0k/Documents/projects/the_opponent_framework/backend/test_vault/ai's_transformational_impact_on_employment:_a_historical_perspective.md
+	- Relevance: 0.7098
+
+2. [[AI and Job Displacement Concerns]]
+	- Path: /home/cbr4l0k/Documents/projects/the_opponent_framework/backend/test_vault/ai_job_displacement_concerns.md
+	- Relevance: 0.6522
+
+3. [[The Benefits of Remote Work]]
+	- Path: /home/cbr4l0k/Documents/projects/the_opponent_framework/backend/test_vault/benefits_of_remote_work.md
+	- Relevance: 0.5840
+
+✅ Suggested Links:
+   1. AI's Transformational Impact on Employment: A Historical Perspective (score: 0.710)
+      Path: /home/cbr4l0k/Documents/projects/the_opponent_framework/backend/test_vault/ai's_transformational_impact_on_employment:_a_historical_perspective.md
+   2. AI and Job Displacement Concerns (score: 0.652)
+      Path: /home/cbr4l0k/Documents/projects/the_opponent_framework/backend/test_vault/ai_job_displacement_concerns.md
+   3. The Benefits of Remote Work (score: 0.584)
+      Path: /home/cbr4l0k/Documents/projects/the_opponent_framework/backend/test_vault/benefits_of_remote_work.md
+
+============================================================
+4. Testing Opponent Challenge
+============================================================
+
+Status Code: 200
+
+✅ Evidence Count: 3
+
+✅ Summary:
+The opposition to the notion that AI will only bring about mass unemployment and fail to create new job opportunities is multifaceted. While MIT research warns of significant task automation, historical precedents suggest technological shifts can lead to novel employment avenues (Source 3). Moreover, concerns over the pace at which AI displaces jobs without adequate replacements are mitigated by evidence that technology often fosters job creation and industry evolution. Additionally, emerging hybrid work models indicate complexities within remote work facilitated by AI, suggesting potential downsides such as social isolation or decreased productivity (Source 2). These counterpoints highlight the need for strategies to support worker transition into new roles and a balanced approach that considers both technological advancements and human labor market needs.
+
+✅ Detailed Analysis (preview):
+1. **Main Claims Identified**:
+   - AI is transforming the workplace by making remote work and task automation common, leading to both opportunities and challenges for workers (Original Note).
+   - The transformation will result in mass unemployment due to faster job displacement from AI than new jo...
+
+✅ Counter-evidence sources:
+   1. AI and Job Displacement Concerns (score: 10.000)
+      Research from MIT shows that AI automation is displacing workers faster than new jobs are being crea...
+   2. The Future of Work is Hybrid (score: 8.000)
+      The post-pandemic workplace is neither fully remote nor fully in-office. Hybrid models combine the b...
+   3. The Benefits of Remote Work (score: 7.000)
+      Remote work has revolutionized productivity. Studies show workers are more productive at home withou...
+
+============================================================
+✅ Tests completed!
+============================================================
