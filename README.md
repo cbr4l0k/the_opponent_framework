@@ -4,75 +4,10 @@
 
 A three-stage AI-powered system that helps create structured notes using the [Noma method](https://www.youtube.com/watch?v=SAsZDg2l1R0), automatically links them within your Obsidian second brain, and then challenges your arguments using an adversarial AI agent. Built to combat echo chambers by providing systematic opposition to your ideas using relevant sources from your own knowledge base.
 
+The full story on the origin/logic behind the framework can be found in my [simple and elegant website](https://simple-elegant-web.site/projects/the_opponent_framework). It has cool drawings.
+
 **Current Version**: REST API interface
 **Next Version**: Telegram bot integration (coming soon)
-
----
-
-## The Story: Why This Exists
-
-<img src="assets/001_i_like_and_hate.png"></img>
-
-### The Problem I Faced
-
-I noticed something disturbing: every AI assistant I used would agree with me. Every social media feed would show me content that confirmed what I already believed. Even when I actively sought out opposing views, they were weak strawmen that made my original position feel stronger.
-
-**I wasn't getting smarter. I was getting more convinced.**
-
-The problem wasn't just social media algorithms or AI training data. It was deeper: *nobody wants to argue with you anymore*. Finding someone who will genuinely challenge your assumptions, point out logical flaws, and force you to defend your ideas with evidence is rare. And when you do find that person, they often lack the context of your specific knowledge base and thought process.
-
-I needed an opponent. Not a debate partner trying to win, but a systematic challenger with one job: **find the holes in my thinking**.
-
-<img src="assets/002_echo_chamber.png"></img>
-
-### The First Prototype: Bash Scripts, Claude, and Git
-
-My first solution was beautifully hacky. I wrote a bash script that:
-- Made requests to my local Ollama endpoints for note creation
-- Pushed my Obsidian vault to Git
-- Used Claude Projects with opponent instructions baked into its memory
-- Had Claude fetch my notes from Git to challenge my arguments
-
-**And honestly? Claude was *incredible* at being an opponent.** It found nuances I missed, questioned assumptions I didn't know I had, and cited my own notes back at me in ways that made me reconsider entire frameworks.
-
-<img src="assets/003_why_so_stupid.png"></img>
-
-### Why I Rebuilt It
-
-But I had a problem: **privacy**.
-
-Every note I sent to Claude was leaving my machine. My personal thoughts, half-formed ideas, sensitive observations about work and life - all being sent to Anthropic's servers. Sure, they have a good privacy policy, but I wasn't comfortable with it. Plus, I wanted to formalize the system, make it more robust, and learn to build agent-based systems properly.
-
-So I rebuilt everything from scratch:
-- Replaced Claude with local Ollama models (privacy-first, zero external API calls)
-- Built a proper FastAPI backend instead of bash scripts
-- Implemented RAG with ChromaDB to keep everything local
-- Designed it as a framework, not just a personal tool
-
-**The tradeoff?** Local models aren't as good as Claude at the opponent role. But they're private, free, and improving rapidly. And the framework is solid enough that when local models catch up, the system will just get better.
-
-<img src="assets/004_ollama_o_claude.png"></img>
-
-### What's Missing (For Now)
-
-The original design included internet search - the opponent could pull counter-evidence from the web, not just your vault. I haven't implemented that yet because:
-1. I wanted to nail the core local-first functionality first
-2. Most valuable challenges come from your *own knowledge base* - things you wrote but forgot, or contradictions between your notes
-3. Internet search introduces privacy concerns again (DNS queries, API calls)
-
-But it's coming. The architecture supports it.
-
-### This Is Both a Framework and a Tool
-
-Here's the important part: **the system doesn't matter as much as the habit**.
-
-Whether you use this framework, my original bash scripts, or just manually search your notes for counterarguments - the value is in *doing the work* to challenge your own ideas. The Opponent Framework just makes that easier, more systematic, and harder to skip.
-
-The goal isn't to win arguments. It's to strengthen thinking by exposing it to systematic opposition.
-
-<img src="assets/005_current_opponent.png"></img>
-
----
 
 ## How It Works
 
