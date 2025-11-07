@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir uv
 
 # Copy dependency files
 COPY pyproject.toml ./
-COPY README.md ./
+COPY ../README.md ./
 
 # Install dependencies using uv
 RUN uv pip install --system --no-cache -e .
@@ -17,6 +17,12 @@ RUN uv pip install --system --no-cache -e .
 FROM python:3.11-slim
 
 WORKDIR /app
+
+# Install curl for healthcheck
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser && \
@@ -38,7 +44,7 @@ USER appuser
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD python -c "import httpx; httpx.get('http://localhost:8000/health', timeout=2.0)" || exit 1
+    CMD curl -f http://localhost:8000/health || exit 1
 
 EXPOSE 8000
 

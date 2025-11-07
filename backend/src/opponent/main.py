@@ -142,6 +142,10 @@ async def root():
                 "challenge": "POST /api/opponent/challenge",
                 "health": "GET /api/opponent/health"
                 },
+            "vault": {
+                "index": "POST /api/vault/index",
+                "health": "GET /api/vault/health"
+                },
             "global_health": "GET /health"
             }
     }
