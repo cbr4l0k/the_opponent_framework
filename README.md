@@ -1,4 +1,4 @@
-# The Opponent Framework
+<img src="./assets/logo.png" style="width:700px">
 
 > *"The best ideas survive opposition; the rest get refined."*
 
